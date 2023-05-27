@@ -20,6 +20,11 @@ contract multiSigWallet {
     mapping (uint256 => mapping(address => bool)) public approvals; //store the approvals of each tx by each owner ( Tx_index => ownerAddress => ture/false) [tx is approved by owner or not]
 
     Transaction[] public transactions; 
+
+    modifier onlyOwner() {
+        require(isOwner[msg.sender], "not owner");
+        _;
+    }
      
     constructor(address[] memory _owners, uint256 _require) {
         require(_owners.length > 0, "owner required");
@@ -32,5 +37,17 @@ contract multiSigWallet {
             owners.push(owner);
         }
         required = _require;   
+    }
+    receive() external payable{
+        emit Deposit(msg.sender, msg.value);
+    }
+    function submit(address _to, uint256 _value, bytes calldata _data) external onlyOwner {
+        transactions.push(Transaction({
+             to: _to,
+             value: _value,
+             data: _data,
+             executed: false
+        }));
+        emit SubmitTransaction (transactions.length - 1);
     }
 }
