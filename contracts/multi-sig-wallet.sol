@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
 contract multiSigWallet {
     event Deposit(address indexed sender, uint256 amount);
@@ -89,4 +90,5 @@ contract multiSigWallet {
     function getOwners() public view returns (address[] memory) {
         return owners;
     }
+
 }

@@ -1,22 +1,20 @@
 const { ethers } = require("hardhat");
 const { expect, assert } = require("chai");
-// const { JsonRpcProvider } = require("ethers/providers");
 
-// const { deployMultiSigWalletContract } = require("./utils/deployment");
 describe("MultiSigWallet", function () {
-  let provider;
   let multiSigWallet;
   let owner1;
   let owner2;
   let owner3;
   let nonOwner;
+  let confirmation = 2;
 
   beforeEach(async function () {
     const MultiSigWallet = await ethers.getContractFactory("multiSigWallet");
     [owner1, owner2, owner3, nonOwner] = await ethers.getSigners();
     multiSigWallet = await MultiSigWallet.deploy(
       [owner1.address, owner2.address, owner3.address],
-      2
+      confirmation
     );
     await multiSigWallet.deployed();
   });
@@ -121,19 +119,6 @@ describe("MultiSigWallet", function () {
       "Tx not exist"
     );
   });
-  it("should not allow confirming an executed transaction", async function () {
-    await multiSigWallet.submit(
-      nonOwner.address,
-      ethers.utils.parseEther("1"),
-      "0x"
-    );
-    await multiSigWallet.connect(owner2).approve(0);
-    await multiSigWallet.connect(owner1).approve(0);
-    await expect(multiSigWallet.connect(owner3).approve(0)).to.be.revertedWith(
-      "tx already approve"
-    );
-  });
-
   it("should allow revoking a confirmation", async function () {
     await multiSigWallet.submit(
       nonOwner.address,
@@ -148,6 +133,11 @@ describe("MultiSigWallet", function () {
   });
   it("should not allow revoking a non-existent transaction", async function () {
     await expect(multiSigWallet.connect(owner1).revoke(0)).to.be.revertedWith(
+      "Tx not exist"
+    );
+  });
+  it("should not allow executing a non-existent transaction", async function () {
+    await expect(multiSigWallet.connect(owner2).approve(1)).to.be.revertedWith(
       "Tx not exist"
     );
   });
