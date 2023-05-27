@@ -9,7 +9,7 @@ contract multiSigWallet {
 
     struct Transaction {
         address to;
-        uint256 value;
+         uint256 value;
         bytes data;
         bool executed;
     }
@@ -72,5 +72,13 @@ contract multiSigWallet {
                 count += 1;
             }
         }
+    }
+    function execute(uint256 _txId) external txExist(_txId) notExecuted(_txId){
+        require(_getApprovalCount(_txId) >= required, "approvals < required");
+        Transaction storage transaction = transactions[_txId];
+        transaction.executed = true;
+        (bool success, ) = transaction.to.call{value: transaction.value}(transaction.data);
+        require(success, "tx failed");
+        emit Execute (_txId);
     }
 }
