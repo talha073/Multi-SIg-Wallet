@@ -116,4 +116,9 @@ describe("MultiSigWallet", function () {
       "tx already approved"
     );
   });
+  it("should not allow confirming a non-existent transaction", async function () {
+    await expect(multiSigWallet.connect(owner1).approve(0)).to.be.revertedWith(
+      "Tx not exist"
+    );
+  });
 });
