@@ -25,6 +25,18 @@ contract multiSigWallet {
         require(isOwner[msg.sender], "not owner");
         _;
     }
+    modifier txExist(uint256 _txId) {
+        require(_txId < transactions.length, "Tx not exist");
+        _;
+    }
+    modifier notApproved(uint256 _txId) {
+        require(!approvals[_txId][msg.sender], "tx already approved");
+        _;
+    }
+    modifier notExecuted(uint256 _txId) {
+        require(!transactions[_txId].executed, "tx already executed");
+        _;
+    }
      
     constructor(address[] memory _owners, uint256 _require) {
         require(_owners.length > 0, "owner required");
@@ -49,5 +61,9 @@ contract multiSigWallet {
              executed: false
         }));
         emit SubmitTransaction (transactions.length - 1);
+    }
+    function approve(uint256 _txId) external onlyOwner txExist(_txId) notApproved(_txId) notExecuted(_txId) {
+        approvals[_txId][msg.sender] = true;
+        emit Approve(msg.sender, _txId);
     }
 }
