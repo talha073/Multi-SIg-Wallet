@@ -146,4 +146,9 @@ describe("MultiSigWallet", function () {
     expect(receipt.events[0].event).to.equal("Revoke");
     expect(receipt.events[0].args.owner).to.equal(owner2.address);
   });
+  it("should not allow revoking a non-existent transaction", async function () {
+    await expect(multiSigWallet.connect(owner1).revoke(0)).to.be.revertedWith(
+      "Tx not exist"
+    );
+  });
 });
