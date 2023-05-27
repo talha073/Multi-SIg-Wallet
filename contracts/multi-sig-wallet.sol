@@ -86,4 +86,7 @@ contract multiSigWallet {
         approvals[_txId][msg.sender] = false;
         emit Revoke(msg.sender, _txId);
     }
+    function getOwners() public view returns (address[] memory) {
+        return owners;
+    }
 }
