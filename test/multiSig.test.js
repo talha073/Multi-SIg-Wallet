@@ -121,4 +121,29 @@ describe("MultiSigWallet", function () {
       "Tx not exist"
     );
   });
+  it("should not allow confirming an executed transaction", async function () {
+    await multiSigWallet.submit(
+      nonOwner.address,
+      ethers.utils.parseEther("1"),
+      "0x"
+    );
+    await multiSigWallet.connect(owner2).approve(0);
+    await multiSigWallet.connect(owner1).approve(0);
+    await expect(multiSigWallet.connect(owner3).approve(0)).to.be.revertedWith(
+      "tx already approve"
+    );
+  });
+
+  it("should allow revoking a confirmation", async function () {
+    await multiSigWallet.submit(
+      nonOwner.address,
+      ethers.utils.parseEther("1"),
+      "0x"
+    );
+    await multiSigWallet.connect(owner2).approve(0);
+    const tx = await multiSigWallet.connect(owner2).revoke(0);
+    const receipt = await tx.wait();
+    expect(receipt.events[0].event).to.equal("Revoke");
+    expect(receipt.events[0].args.owner).to.equal(owner2.address);
+  });
 });
